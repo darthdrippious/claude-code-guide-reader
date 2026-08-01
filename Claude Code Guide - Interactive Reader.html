@@ -9,7 +9,7 @@
 :root{
   --bg:#F7F4ED; --bg2:#FFFDF7; --ink:#22201B; --ink2:#5C574C; --ink3:#8A8272;
   --rule:#E2DCCE; --accent:#B5761F; --accent-soft:#F0E3CC;
-  --hl-y:#FBE59A; --hl-g:#BDE7BD; --hl-b:#BBD9F2; --hl-p:#E3CDF0;
+  --hl-y:#FBE59A; /* search-result match emphasis (.res .rt b) */
   --fs:17px; --lh:1.72; --measure:35rem;
   --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
   --serif:Charter,Georgia,"Iowan Old Style","Times New Roman",serif;
@@ -17,7 +17,7 @@
 }
 [data-theme="sepia"]{ --bg:#EFE4CF; --bg2:#F7EFDE; --ink:#3A2E1E; --ink2:#6A5943; --ink3:#94836B; --rule:#DCCBAC; --accent:#9A5B12; --accent-soft:#E5D3B2; }
 [data-theme="night"]{ --bg:#14161A; --bg2:#1B1E23; --ink:#E4E2DC; --ink2:#A8A49A; --ink3:#7C7870; --rule:#2C3037; --accent:#E0A34B; --accent-soft:#2A2620;
-  --hl-y:#6B5A18; --hl-g:#2E5233; --hl-b:#234662; --hl-p:#4A2F58; }
+  --hl-y:#6B5A18; }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
@@ -67,9 +67,12 @@ button{font-family:var(--sans);cursor:pointer;border:0;background:none;color:inh
 #content blockquote p:last-child{margin-bottom:0}
 #content blockquote.milestone{border-left-color:var(--accent);background:var(--accent-soft)}
 #content strong{font-weight:680}
-mark.hl{border-radius:3px;padding:.06em 0;background:var(--hl-y);color:inherit;cursor:pointer}
-mark.hl.c2{background:var(--hl-g)} mark.hl.c3{background:var(--hl-b)} mark.hl.c4{background:var(--hl-p)}
-mark.hl.noted{box-shadow:inset 0 -2px 0 var(--accent)}
+/* glossary term — text-decoration only, so it can never alter a line box.
+   Must stay display:inline (not a <button>) so multi-word terms still wrap. */
+.gt{text-decoration:underline dotted var(--accent);text-underline-offset:.18em;
+  text-decoration-thickness:1px;cursor:pointer}
+.gt:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+.gt.on{background:var(--accent-soft);border-radius:3px}
 .flash{animation:fl 1.6s ease}
 @keyframes fl{0%,55%{background:var(--accent-soft)}100%{background:transparent}}
 .copyBtn{position:absolute;top:7px;right:7px;font-size:11px;padding:5px 9px;border-radius:7px;
@@ -122,6 +125,8 @@ mark.hl.noted{box-shadow:inset 0 -2px 0 var(--accent)}
 [data-theme="night"] .chk.on svg{stroke:#14161A}
 .t3{display:block;padding:7px 16px 7px 40px;font-family:var(--sans);font-size:12.5px;color:var(--ink2)}
 .t3:active{color:var(--accent)}
+/* author `display:block` above beats the UA sheet's [hidden] rule — restate it */
+.t3[hidden]{display:none}
 
 /* settings */
 .row{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;gap:14px}
@@ -139,38 +144,29 @@ mark.hl.noted{box-shadow:inset 0 -2px 0 var(--accent)}
 [data-theme="night"] .res .rt b{color:var(--ink)}
 .empty{padding:34px 22px;text-align:center;color:var(--ink3);font-family:var(--sans);font-size:14px}
 
-/* notes */
-.note{padding:14px 18px;border-bottom:1px solid var(--rule)}
-.note .q{font-size:14.5px;line-height:1.55;border-left:3px solid var(--accent);padding-left:11px;margin-bottom:7px}
-.note .n{font-family:var(--sans);font-size:13px;color:var(--ink2);background:var(--bg2);
-  padding:9px 11px;border-radius:9px;margin-bottom:7px;white-space:pre-wrap}
-.note .meta{display:flex;gap:14px;font-family:var(--sans);font-size:11.5px;color:var(--ink3)}
-.note .meta button{font-size:11.5px;color:var(--accent);font-weight:600}
-
 /* glossary */
 .gitem{padding:12px 18px;border-bottom:1px solid var(--rule)}
 .gitem dt{font-family:var(--sans);font-weight:650;font-size:14px;margin-bottom:3px}
 .gitem dd{margin:0;font-size:14px;line-height:1.55;color:var(--ink2)}
 
+/* glossary tooltip */
+/* 100vw includes the scrollbar; leave enough slack that it always fits */
+#gtip{position:absolute;z-index:95;display:none;width:min(21rem,calc(100vw - 44px));
+  background:var(--bg2);border:1px solid var(--rule);border-radius:13px;padding:12px 14px;
+  box-shadow:0 8px 30px rgba(0,0,0,.22)}
+#gtip.on{display:block}
+#gtip .gt-t{font-family:var(--sans);font-size:13.5px;font-weight:650;color:var(--accent);margin-bottom:4px}
+#gtip .gt-d{font-size:14px;line-height:1.5;color:var(--ink2)}
+#gtip .gt-m{margin-top:9px;font-family:var(--sans);font-size:11.5px;color:var(--accent);font-weight:600}
+
 /* selection toolbar */
 #seltb{position:absolute;z-index:90;display:none;gap:4px;padding:6px;background:var(--ink);
   border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.3)}
 #seltb.on{display:flex}
-.sw{width:30px;height:30px;border-radius:8px;border:2px solid transparent}
-.sw:active{border-color:#fff}
-#seltb .lab{padding:0 11px;height:30px;display:grid;place-items:center;color:#fff;
-  font-family:var(--sans);font-size:12.5px;font-weight:600}
+#seltb .lab{padding:0 11px;height:32px;display:grid;place-items:center;color:#fff;
+  font-family:var(--sans);font-size:12.5px;font-weight:600;border-radius:8px}
+#seltb .lab:active{background:rgba(255,255,255,.18)}
 [data-theme="night"] #seltb{background:#3A3F47}
-
-textarea.na{width:100%;min-height:96px;padding:12px;border-radius:11px;border:1px solid var(--rule);
-  background:var(--bg2);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;resize:vertical}
-textarea.na:focus{outline:2px solid var(--accent);outline-offset:-1px}
-.btnrow{display:flex;gap:9px;padding:12px 18px 18px}
-.btnrow button{flex:1;padding:13px;border-radius:11px;font-family:var(--sans);font-size:14px;font-weight:650}
-.bp{background:var(--accent);color:#fff}
-[data-theme="night"] .bp{color:#14161A}
-.bs{background:var(--bg2);border:1px solid var(--rule);color:var(--ink2)}
-.bd{background:none;color:#C4553D;flex:0 0 auto;padding:13px 16px}
 
 #resume{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:65;
   background:var(--ink);color:var(--bg);border-radius:14px;padding:13px 16px;display:none;
@@ -183,6 +179,22 @@ textarea.na:focus{outline:2px solid var(--accent);outline-offset:-1px}
 [data-theme="night"] #resume{background:#E4E2DC;color:#14161A}
 [data-theme="night"] #resume button{color:#14161A;background:rgba(0,0,0,.1)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---------- laptop: persistent TOC sidebar ---------- */
+@media(min-width:1100px){
+  /* padding on <body> shifts the sticky #bar and #wrap together into the
+     content column — no DOM restructuring needed. #seltb/#gtip are absolute
+     against the initial containing block, so they stay viewport-correct. */
+  body{padding-left:300px}
+  #toc{width:300px;transform:none!important;box-shadow:none;
+    top:0;bottom:0;left:0;background:var(--bg2)}
+  #toc .xbtn[data-close]{display:none}
+  #bToc{display:none}
+  .scrim{display:none!important}
+  #resume{left:calc(300px + 16px);right:16px;margin:0 auto}
+  /* sheets stay centred over the reading column, not the whole window */
+  .sheet{left:300px}
+}
 </style>
 </head>
 <body>
@@ -192,7 +204,6 @@ textarea.na:focus{outline:2px solid var(--accent);outline-offset:-1px}
     <button class="ico" id="bSearch" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
     <div id="crumb">Claude Code for Non-Coders</div>
     <button class="ico" id="bGloss" aria-label="Glossary"><svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 015.5 4H18a1 1 0 011 1v14a1 1 0 01-1 1H5.5A1.5 1.5 0 014 18.5z"/><path d="M8 8h7M8 12h7"/></svg></button>
-    <button class="ico" id="bNotes" aria-label="Notes"><svg viewBox="0 0 24 24"><path d="M6 3h9l5 5v13a1 1 0 01-1 1H6a1 1 0 01-1-1V4a1 1 0 011-1z"/><path d="M14 3v6h6"/></svg></button>
     <button class="ico" id="bAa" aria-label="Display"><svg viewBox="0 0 24 24"><path d="M4 19l5.5-14L15 19M6 14h7M17 19l3-8 3 8M18 16.5h4" /></svg></button>
   </div>
   <div id="pbar"><div id="pfill"></div></div>
@@ -907,12 +918,13 @@ vulnerabilities, auth flaws, secrets in code, and insecure data handling.
 <p><em>End of guide.</em></p></div></div>
 
 <div id="seltb">
-  <button class="sw" data-c="c1" style="background:#FBE59A" aria-label="Yellow"></button>
-  <button class="sw" data-c="c2" style="background:#BDE7BD" aria-label="Green"></button>
-  <button class="sw" data-c="c3" style="background:#BBD9F2" aria-label="Blue"></button>
-  <button class="sw" data-c="c4" style="background:#E3CDF0" aria-label="Purple"></button>
-  <button class="lab" id="selNote">Note</button>
+  <button class="lab" data-lk="google">Google</button>
+  <button class="lab" data-lk="claude">Claude</button>
+  <button class="lab" data-lk="plx">Perplexity</button>
+  <button class="lab" data-lk="copy">Copy</button>
 </div>
+
+<div id="gtip" role="dialog" aria-label="Glossary definition"></div>
 
 <div id="resume"><div class="rl"><b>Pick up where you left off</b><span id="resumeTx"></span></div><button id="resumeGo">Resume</button></div>
 
@@ -946,12 +958,6 @@ vulnerabilities, auth flaws, secrets in code, and insecure data handling.
   <div class="pbody" id="qBody"><div class="empty">Type to search all 13 modules.</div></div>
 </div>
 
-<div class="panel sheet" id="pNotes">
-  <div class="grab"></div>
-  <div class="phead"><h3>Highlights &amp; Notes</h3><button class="xbtn" id="expNotes">Export</button><button class="xbtn" data-close>Done</button></div>
-  <div class="pbody" id="nBody"></div>
-</div>
-
 <div class="panel sheet" id="pGloss">
   <div class="grab"></div>
   <div class="phead"><h3>Glossary</h3><button class="xbtn" data-close>Done</button></div>
@@ -959,50 +965,32 @@ vulnerabilities, auth flaws, secrets in code, and insecure data handling.
   <div class="pbody" id="gBody"></div>
 </div>
 
-<div class="panel sheet" id="pNote">
-  <div class="grab"></div>
-  <div class="phead"><h3 id="noteTitle">Note</h3><button class="xbtn" data-close>Cancel</button></div>
-  <div class="pbody">
-    <div style="padding:12px 18px 4px"><div class="note"><div class="q" id="noteQuote" style="border:0;padding:0"></div></div></div>
-    <div style="padding:4px 18px"><textarea class="na" id="noteText" placeholder="Why does this matter? What will you do with it?"></textarea></div>
-    <div class="btnrow">
-      <button class="bd" id="noteDel">Delete</button>
-      <button class="bp" id="noteSave">Save note</button>
-    </div>
-  </div>
-</div>
-
-<div class="panel sheet" id="pExport">
-  <div class="grab"></div>
-  <div class="phead"><h3>Export notes</h3><button class="xbtn" data-close>Done</button></div>
-  <div class="pbody">
-    <div style="padding:8px 18px"><textarea class="na" id="expText" style="min-height:210px;font-family:var(--mono);font-size:12px" readonly></textarea></div>
-    <div class="btnrow"><button class="bs" id="expCopy">Copy markdown</button></div>
-  </div>
-</div>
-
 <script>
 (function(){
 "use strict";
 var $=function(s){return document.querySelector(s)},$$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s))};
 
-/* ---------- storage (window.storage w/ in-memory fallback) ---------- */
+/* ---------- storage (localStorage w/ in-memory fallback) ----------
+   The try/catch is load-bearing, not boilerplate. Every iOS browser (Chrome
+   included) runs on WebKit, and a page opened from file:// can be given an
+   opaque origin where touching localStorage THROWS SecurityError rather than
+   returning null. The mem tier keeps the reader fully usable in that case —
+   settings just don't survive a reload, which is the spec's stated
+   "best-effort, not guaranteed" posture.                                    */
 var mem={};
 var store={
-  get:async function(k){
-    try{ if(window.storage){var r=await window.storage.get(k); return r&&r.value?JSON.parse(r.value):null;} }
-    catch(e){}
+  get:function(k){
+    try{ var r=localStorage.getItem(k); if(r) return JSON.parse(r); }catch(e){}
     return mem[k]||null;
   },
-  set:async function(k,v){
+  set:function(k,v){
     mem[k]=v;
-    try{ if(window.storage) await window.storage.set(k,JSON.stringify(v)); }catch(e){}
+    try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){}
   }
 };
-var K={prefs:'guide:prefs',prog:'guide:progress',marks:'guide:marks'};
+var K={prefs:'guide:prefs',prog:'guide:progress'};
 var prefs={fs:17,lh:1.72,th:'paper',w:'35rem'};
 var prog={mods:{},last:null,lastTx:''};
-var marks=[];
 var saveT={};
 function save(key,val){ clearTimeout(saveT[key]); saveT[key]=setTimeout(function(){store.set(key,val)},350); }
 
@@ -1041,6 +1029,7 @@ var sections=[]; // {id,title,type,el,start,end}
 
 /* modules = h2 starting with MODULE */
 var modules=sections.filter(function(s){return /^MODULE\s/i.test(s.title)});
+var byId={}; sections.forEach(function(s){ byId[s.id]=s; });
 
 /* ---------- render TOC ---------- */
 function renderToc(filter){
@@ -1067,6 +1056,18 @@ function renderToc(filter){
       }
       row.innerHTML=chk+(num?'<span class="num">'+num[1]+'</span>':'')+'<span class="tx">'+label+'</span>';
       frag.appendChild(row);
+      /* Sub-sections render for every module but stay hidden; markCurrentToc
+         reveals only the one you're reading. All 100+ H3s at once would bury
+         the module list in both the drawer and the sidebar. */
+      if(!f){
+        var sec=byId[el.id];
+        if(sec) sec.subs.forEach(function(s){
+          var sr=document.createElement('div');
+          sr.className='t3'; sr.dataset.go=s.id; sr.dataset.sub=el.id; sr.hidden=true;
+          sr.textContent=s.title.replace(/^(\d+\.\d+)\s*—\s*/,'$1  ');
+          frag.appendChild(sr);
+        });
+      }
     }
   });
   body.appendChild(frag);
@@ -1084,6 +1085,7 @@ $('#tocFilter').addEventListener('input',function(e){renderToc(e.target.value)})
 function markCurrentToc(){
   var id=currentSectionId();
   $$('#tocBody .t2').forEach(function(r){ r.classList.toggle('cur',r.dataset.go===id) });
+  $$('#tocBody .t3').forEach(function(r){ r.hidden=r.dataset.sub!==id });
 }
 
 /* ---------- module footers ---------- */
@@ -1136,7 +1138,6 @@ $$('[data-close]').forEach(function(b){b.addEventListener('click',close)});
 $('#bToc').addEventListener('click',function(){renderToc($('#tocFilter').value);open('#toc')});
 $('#bAa').addEventListener('click',function(){open('#pSet')});
 $('#bSearch').addEventListener('click',function(){open('#pSearch');setTimeout(function(){$('#qInput').focus()},280)});
-$('#bNotes').addEventListener('click',function(){renderNotes();open('#pNotes')});
 $('#bGloss').addEventListener('click',function(){renderGloss($('#gInput').value);open('#pGloss')});
 
 /* ---------- display prefs ---------- */
@@ -1163,7 +1164,7 @@ function currentSectionId(){
   }
   return id;
 }
-var tick=false;
+var tick=false,lastTocId=null;
 window.addEventListener('scroll',function(){
   if(tick)return; tick=true;
   requestAnimationFrame(function(){
@@ -1177,6 +1178,7 @@ window.addEventListener('scroll',function(){
         var t=el.textContent.replace(/^MODULE\s+(\d+):\s*/i,'M$1 · ');
         $('#crumb').textContent=t;
       }
+      if(id!==lastTocId){ lastTocId=id; markCurrentToc(); }
     }
     // bookmark furthest-ish: store nearest block to viewport top
     var top=window.scrollY+90,bi=0;
@@ -1251,42 +1253,132 @@ function renderGloss(q){
 }
 $('#gInput').addEventListener('input',function(e){renderGloss(e.target.value)});
 
-/* ---------- highlights ---------- */
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
-function offsetIn(block,node,off){
-  if(node.nodeType!==3){
-    var r=document.createRange(); r.selectNodeContents(block);
-    try{ r.setEnd(node,off); return r.toString().length; }catch(e){ return 0; }
+/* ---------- inline glossary tooltips ---------- */
+
+/* Display terms aren't literal match targets. "API (Application Programming
+   Interface)" should match both forms; "Array / list" is two aliases; but the
+   parenthetical in "Environment (dev vs production)" is a qualifier, not a name. */
+function aliasesFor(term){
+  var out=[],base=term;
+  var paren=term.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
+  if(paren){
+    base=paren[1].trim();
+    var inner=paren[2].trim().replace(/^["“']|["”']$/g,'');
+    if(!/\bvs\b/i.test(inner)) out.push(inner);   // expansion or short form, not a qualifier
   }
-  var w=document.createTreeWalker(block,NodeFilter.SHOW_TEXT),acc=0,n;
-  while((n=w.nextNode())){ if(n===node)return acc+off; acc+=n.nodeValue.length; }
-  return acc;
-}
-function applyMark(m){
-  var block=blocks[m.b]; if(!block)return;
-  var w=document.createTreeWalker(block,NodeFilter.SHOW_TEXT),acc=0,n,sN=null,sO=0,eN=null,eO=0;
-  while((n=w.nextNode())){
-    var len=n.nodeValue.length;
-    if(sN===null&&acc+len>m.s){ sN=n; sO=m.s-acc; }
-    if(sN!==null&&acc+len>=m.e){ eN=n; eO=m.e-acc; break; }
-    acc+=len;
-  }
-  if(!sN||!eN)return;
-  var r=document.createRange();
-  try{ r.setStart(sN,sO); r.setEnd(eN,eO); }catch(e){ return; }
-  var el=document.createElement('mark');
-  el.className='hl '+(m.c||'c1')+(m.n?' noted':''); el.dataset.mid=m.id;
-  try{ r.surroundContents(el); }
-  catch(e){ try{ el.appendChild(r.extractContents()); r.insertNode(el); }catch(e2){ return; } }
-}
-function renderMarks(){
-  $$('#content mark.hl').forEach(function(el){
-    var p=el.parentNode; while(el.firstChild)p.insertBefore(el.firstChild,el);
-    p.removeChild(el); p.normalize();
-  });
-  marks.slice().sort(function(a,b){return b.b-a.b||b.s-a.s}).forEach(applyMark);
+  base.split(/\s*\/\s*/).forEach(function(a){ a=a.trim(); if(a) out.push(a); });
+  return out.filter(function(a,i,arr){ return a&&arr.indexOf(a)===i; });
 }
 
+/* ===================================================================
+   MATCH POLICY — the one real judgement call in this file.
+   The glossary defines ordinary English words in their technical sense, so
+   annotating every occurrence would underline hundreds of words across 17,000.
+   Three levers, tune freely:
+     GT_MIN_LEN  raise to annotate fewer, longer terms (4 drops CI/IDE/npm/TUI)
+     GT_DENY     aliases that are too common in their ordinary English sense
+     GT_SCOPE    'module'   = first occurrence per module   (a reminder per module)
+                 'document' = first occurrence overall      (near-silent after Module 0)
+   =================================================================== */
+var GT_MIN_LEN = 4;
+var GT_DENY    = ['list','state','loop','object'];
+var GT_SCOPE   = 'module';
+
+function annotateGlossary(){
+  var aliases=[],byAlias={};
+  glossary.forEach(function(g){
+    aliasesFor(g.t).forEach(function(a){
+      if(a.length<GT_MIN_LEN) return;
+      if(GT_DENY.indexOf(a.toLowerCase())>=0) return;
+      aliases.push(a); byAlias[a.toLowerCase()]=g.t;
+    });
+  });
+  if(!aliases.length) return;
+  /* longest first, so "Continuous Integration" is claimed before "Integration" */
+  aliases.sort(function(x,y){ return y.length-x.length; });
+  var re=new RegExp('\\b('+aliases.map(function(a){
+    return a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  }).join('|')+')\\b','gi');
+
+  var gloss=document.getElementById('glossary');
+  var walker=document.createTreeWalker(content,NodeFilter.SHOW_TEXT,{
+    acceptNode:function(n){
+      if(!n.nodeValue||!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      /* never annotate code, headings, links, or the module footer buttons */
+      return n.parentNode.closest('pre,code,h1,h2,h3,h4,a,.gt,.modfoot')
+        ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  var nodes=[],n; while((n=walker.nextNode())) nodes.push(n);
+
+  var seen={};
+  nodes.forEach(function(node){
+    /* the glossary must not annotate itself */
+    if(gloss && (gloss.compareDocumentPosition(node)&Node.DOCUMENT_POSITION_FOLLOWING)) return;
+    var holder=node.parentNode.closest('[data-sec]');
+    var scope=GT_SCOPE==='document'?'*':((holder&&holder.dataset.sec)||'*');
+    var text=node.nodeValue,frag=null,last=0,m;
+    re.lastIndex=0;
+    while((m=re.exec(text))){
+      var key=scope+'|'+m[1].toLowerCase();
+      if(seen[key]) continue;
+      seen[key]=1;
+      if(!frag) frag=document.createDocumentFragment();
+      if(m.index>last) frag.appendChild(document.createTextNode(text.slice(last,m.index)));
+      var sp=document.createElement('span');
+      sp.className='gt'; sp.tabIndex=0; sp.setAttribute('role','button');
+      sp.dataset.term=byAlias[m[1].toLowerCase()]||m[1];
+      sp.textContent=m[1];
+      frag.appendChild(sp);
+      last=m.index+m[1].length;
+    }
+    if(frag){
+      if(last<text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+      node.parentNode.replaceChild(frag,node);
+    }
+  });
+}
+
+var gtip=$('#gtip');
+function hideTip(){
+  gtip.classList.remove('on');
+  $$('#content .gt.on').forEach(function(e){ e.classList.remove('on'); });
+}
+function showTip(el){
+  var g=glossary.filter(function(x){return x.t===el.dataset.term})[0];
+  if(!g) return;
+  hideTip(); el.classList.add('on');
+  gtip.innerHTML='<div class="gt-t">'+esc(g.t)+'</div><div class="gt-d">'+esc(g.d)+
+    '</div><div class="gt-m" data-gfull>Open full glossary →</div>';
+  gtip.classList.add('on');
+  /* clamp against clientWidth, not innerWidth — the latter counts the
+     scrollbar, which is how a "clamped" popup still overhangs the edge */
+  var r=el.getBoundingClientRect(),w=gtip.offsetWidth,h=gtip.offsetHeight;
+  var vw=document.documentElement.clientWidth;
+  gtip.style.left=Math.max(8,Math.min(r.left+r.width/2-w/2,vw-w-8))+'px';
+  var y=r.top+window.scrollY-h-9;
+  gtip.style.top=(y<window.scrollY+56?r.bottom+window.scrollY+9:y)+'px';
+}
+content.addEventListener('click',function(e){
+  var t=e.target.closest('.gt');
+  if(t){ e.stopPropagation(); showTip(t); }
+});
+content.addEventListener('keydown',function(e){
+  if((e.key==='Enter'||e.key===' ')&&e.target.classList&&e.target.classList.contains('gt')){
+    e.preventDefault(); showTip(e.target);
+  }
+});
+gtip.addEventListener('click',function(e){
+  if(e.target.closest('[data-gfull]')){ hideTip(); renderGloss($('#gInput').value); open('#pGloss'); }
+});
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.gt')&&!e.target.closest('#gtip')) hideTip();
+});
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){ hideTip(); hideTb(); }
+});
+
+/* ---------- text-selection lookup ---------- */
 var seltb=$('#seltb'),pending=null;
 function hideTb(){ seltb.classList.remove('on'); }
 document.addEventListener('selectionchange',function(){
@@ -1304,106 +1396,58 @@ document.addEventListener('selectionchange',function(){
       pending=r.cloneRange();
       var rect=r.getBoundingClientRect();
       seltb.classList.add('on');
-      var w=seltb.offsetWidth||210;
-      var x=Math.min(Math.max(8,rect.left+rect.width/2-w/2),window.innerWidth-w-8);
+      var w=seltb.offsetWidth||210,vw=document.documentElement.clientWidth;
+      var x=Math.max(8,Math.min(rect.left+rect.width/2-w/2,vw-w-8));
       var y=rect.top+window.scrollY-seltb.offsetHeight-10;
       if(y<window.scrollY+56) y=rect.bottom+window.scrollY+10;
       seltb.style.left=x+'px'; seltb.style.top=y+'px';
     },10);
   },{passive:true});
 });
-function makeMarks(color){
-  if(!pending)return[];
-  var made=[];
-  blocks.forEach(function(b,i){
-    var inter;
-    try{ inter=pending.intersectsNode(b); }catch(e){ inter=false; }
-    if(!inter)return;
-    var st=b.contains(pending.startContainer)||b===pending.startContainer?offsetIn(b,pending.startContainer,pending.startOffset):0;
-    var en=b.contains(pending.endContainer)||b===pending.endContainer?offsetIn(b,pending.endContainer,pending.endOffset):b.textContent.length;
-    if(en<=st)return;
-    var txt=b.textContent.slice(st,en).trim();
-    if(txt.length<2)return;
-    made.push({id:uid(),b:i,s:st,e:en,c:color,n:'',tx:txt,sec:b.dataset.secTitle||'',ts:Date.now()});
-  });
-  return made;
+/* Keep the text selection alive when the toolbar is pressed — without this,
+   mousedown inside the toolbar collapses the selection before the click lands. */
+seltb.addEventListener('mousedown',function(e){ e.preventDefault(); });
+
+/* Expand a selection out to its containing sentence so an AI lookup has enough
+   context to disambiguate a bare phrase. */
+function sentenceAround(r){
+  if(!r) return '';
+  var node=r.startContainer;
+  while(node&&node.nodeType!==1) node=node.parentNode;
+  var block=node&&node.closest?node.closest('#content p,#content li,#content blockquote,#content h1,#content h2,#content h3,#content h4'):null;
+  if(!block) return '';
+  var full=block.textContent.replace(/\s+/g,' ').trim();
+  var pick=r.toString().replace(/\s+/g,' ').trim();
+  var at=full.indexOf(pick);
+  if(at<0) return '';
+  var s=at,e=at+pick.length;
+  while(s>0&&!/[.!?]/.test(full.charAt(s-1))) s--;
+  while(e<full.length&&!/[.!?]/.test(full.charAt(e))) e++;
+  return full.slice(s,Math.min(e+1,full.length)).trim();
 }
+function aiPrompt(sel,ctx){
+  var p='Explain "'+sel+'" in plain language, for someone learning to build software with AI coding tools.';
+  if(ctx&&ctx!==sel) p+='\n\nIt appeared in this sentence: "'+ctx+'"';
+  return p.length>1000?p.slice(0,1000):p;
+}
+var LOOKUP={
+  google:function(sel){ return 'https://www.google.com/search?q='+encodeURIComponent(sel); },
+  claude:function(sel,ctx){ return 'https://claude.ai/new?q='+encodeURIComponent(aiPrompt(sel,ctx)); },
+  plx:function(sel,ctx){ return 'https://www.perplexity.ai/search?q='+encodeURIComponent(aiPrompt(sel,ctx)); }
+};
 seltb.addEventListener('click',function(e){
-  var sw=e.target.closest('.sw');
-  if(sw){
-    var made=makeMarks(sw.dataset.c);
-    if(made.length){ marks=marks.concat(made); save(K.marks,marks); renderMarks(); }
-    window.getSelection().removeAllRanges(); hideTb(); pending=null; return;
+  var b=e.target.closest('[data-lk]'); if(!b)return;
+  var sel=pending?pending.toString().replace(/\s+/g,' ').trim():'';
+  if(!sel){ hideTb(); return; }
+  if(b.dataset.lk==='copy'){
+    if(navigator.clipboard) navigator.clipboard.writeText(sel);
+    b.textContent='Copied'; setTimeout(function(){b.textContent='Copy'},1200);
+    return;
   }
-  if(e.target.id==='selNote'){
-    var m2=makeMarks('c1');
-    if(m2.length){ marks=marks.concat(m2); save(K.marks,marks); renderMarks();
-      window.getSelection().removeAllRanges(); hideTb();
-      openNote(m2[0].id);
-    }
-    pending=null;
-  }
-});
-content.addEventListener('click',function(e){
-  var m=e.target.closest('mark.hl'); if(!m)return;
-  openNote(m.dataset.mid);
-});
-
-/* note editor */
-var editing=null;
-function openNote(id){
-  var m=marks.filter(function(x){return x.id===id})[0]; if(!m)return;
-  editing=id;
-  $('#noteQuote').textContent='“'+m.tx.slice(0,220)+(m.tx.length>220?'…':'')+'”';
-  $('#noteText').value=m.n||'';
-  $('#noteTitle').textContent=m.n?'Edit note':'Add note';
-  open('#pNote'); setTimeout(function(){$('#noteText').focus()},300);
-}
-$('#noteSave').addEventListener('click',function(){
-  var m=marks.filter(function(x){return x.id===editing})[0];
-  if(m){ m.n=$('#noteText').value.trim(); save(K.marks,marks); renderMarks(); }
-  close();
-});
-$('#noteDel').addEventListener('click',function(){
-  marks=marks.filter(function(x){return x.id!==editing});
-  save(K.marks,marks); renderMarks(); close();
-});
-
-/* notes list */
-function renderNotes(){
-  if(!marks.length){ $('#nBody').innerHTML='<div class="empty">Select any text in the guide to highlight it or attach a note.</div>'; return; }
-  var s=marks.slice().sort(function(a,b){return a.b-b.b});
-  $('#nBody').innerHTML=s.map(function(m){
-    return '<div class="note"><div class="q" style="border-color:var(--hl-'+
-      ({c1:'y',c2:'g',c3:'b',c4:'p'}[m.c]||'y')+')">'+esc(m.tx.slice(0,240))+'</div>'+
-      (m.n?'<div class="n">'+esc(m.n)+'</div>':'')+
-      '<div class="meta"><span>'+esc((m.sec||'').slice(0,40))+'</span>'+
-      '<button data-jump="'+m.b+'">Go to</button><button data-edit="'+m.id+'">'+(m.n?'Edit note':'Add note')+'</button></div></div>';
-  }).join('');
-}
-$('#nBody').addEventListener('click',function(e){
-  var j=e.target.closest('[data-jump]');
-  if(j){ close(); setTimeout(function(){jumpBlock(+j.dataset.jump,true)},240); return; }
-  var ed=e.target.closest('[data-edit]');
-  if(ed){ openNote(ed.dataset.edit); }
-});
-$('#expNotes').addEventListener('click',function(){
-  var s=marks.slice().sort(function(a,b){return a.b-b.b});
-  var out='# Notes — Claude Code for Non-Coders\n\n';
-  var cur='';
-  s.forEach(function(m){
-    if(m.sec!==cur){ cur=m.sec; out+='\n## '+cur+'\n\n'; }
-    out+='> '+m.tx.replace(/\n/g,' ')+'\n';
-    if(m.n) out+='\n'+m.n+'\n';
-    out+='\n';
-  });
-  $('#expText').value=out;
-  open('#pExport');
-});
-$('#expCopy').addEventListener('click',function(){
-  var t=$('#expText'); t.select();
-  navigator.clipboard&&navigator.clipboard.writeText(t.value);
-  $('#expCopy').textContent='Copied ✓'; setTimeout(function(){$('#expCopy').textContent='Copy markdown'},1500);
+  /* Opened synchronously inside the click handler on purpose: deferring this
+     behind any async work gets the new tab killed by the iOS popup blocker. */
+  window.open(LOOKUP[b.dataset.lk](sel,sentenceAround(pending)),'_blank','noopener');
+  hideTb(); pending=null;
 });
 
 /* ---------- resume ---------- */
@@ -1414,11 +1458,10 @@ $('#resumeGo').addEventListener('click',function(){
 setTimeout(function(){ $('#resume').classList.remove('on') },14000);
 
 /* ---------- boot ---------- */
-(async function(){
-  var p=await store.get(K.prefs); if(p)prefs=Object.assign(prefs,p);
-  var g=await store.get(K.prog); if(g)prog=Object.assign(prog,g);
-  var m=await store.get(K.marks); if(m&&m.length)marks=m;
-  applyPrefs(); renderMarks(); syncModBtns(); renderToc(''); renderGloss('');
+(function(){
+  var p=store.get(K.prefs); if(p)prefs=Object.assign(prefs,p);
+  var g=store.get(K.prog);  if(g)prog=Object.assign(prog,g);
+  applyPrefs(); annotateGlossary(); syncModBtns(); renderToc(''); renderGloss('');
   if(prog.last&&prog.last>3){
     $('#resumeTx').textContent=prog.lastTx||('Block '+prog.last);
     $('#resume').classList.add('on');

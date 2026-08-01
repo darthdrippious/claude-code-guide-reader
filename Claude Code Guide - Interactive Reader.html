@@ -174,10 +174,13 @@ button{font-family:var(--sans);cursor:pointer;border:0;background:none;color:inh
 #resume.on{display:flex}
 #resume .rl{flex:1;font-family:var(--sans);font-size:13px;line-height:1.35}
 #resume .rl b{display:block;font-size:11px;opacity:.65;font-weight:500;margin-bottom:2px}
-#resume button{font-family:var(--sans);font-size:13px;font-weight:650;color:var(--bg);
+#resumeGo{font-family:var(--sans);font-size:13px;font-weight:650;color:var(--bg);
   background:rgba(255,255,255,.16);padding:9px 13px;border-radius:9px}
+#resumeX{width:28px;height:28px;border-radius:7px;font-size:14px;opacity:.55;flex-shrink:0}
+#resumeX:active{opacity:.9;background:rgba(255,255,255,.16)}
 [data-theme="night"] #resume{background:#E4E2DC;color:#14161A}
-[data-theme="night"] #resume button{color:#14161A;background:rgba(0,0,0,.1)}
+[data-theme="night"] #resumeGo{color:#14161A;background:rgba(0,0,0,.1)}
+[data-theme="night"] #resumeX{color:#14161A}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
 /* ---------- laptop: persistent TOC sidebar ---------- */
@@ -924,9 +927,9 @@ vulnerabilities, auth flaws, secrets in code, and insecure data handling.
   <button class="lab" data-lk="copy">Copy</button>
 </div>
 
-<div id="gtip" role="dialog" aria-label="Glossary definition"></div>
+<div id="gtip" role="tooltip"></div>
 
-<div id="resume"><div class="rl"><b>Pick up where you left off</b><span id="resumeTx"></span></div><button id="resumeGo">Resume</button></div>
+<div id="resume"><div class="rl"><b>Pick up where you left off</b><span id="resumeTx"></span></div><button id="resumeGo">Resume</button><button id="resumeX" aria-label="Dismiss">✕</button></div>
 
 <div class="scrim" id="scrim"></div>
 
@@ -1193,12 +1196,12 @@ window.addEventListener('scroll',function(){
 
 function jumpTo(id){
   var el=document.getElementById(id); if(!el)return;
-  var y=el.getBoundingClientRect().top+window.scrollY-56;
+  var y=el.getBoundingClientRect().top+window.scrollY-64;
   window.scrollTo({top:y,behavior:'smooth'});
 }
 function jumpBlock(i,flash){
   var b=blocks[i]; if(!b)return;
-  var y=b.getBoundingClientRect().top+window.scrollY-70;
+  var y=b.getBoundingClientRect().top+window.scrollY-64;
   window.scrollTo({top:y,behavior:'smooth'});
   if(flash){ b.classList.add('flash'); setTimeout(function(){b.classList.remove('flash')},1700); }
 }
@@ -1214,9 +1217,11 @@ $('#qInput').addEventListener('input',function(e){
   var out=[];
   for(var k=0;k<idx.length&&out.length<60;k++){
     var p=idx[k].l.indexOf(q); if(p<0)continue;
-    var st=Math.max(0,p-45),tx=idx[k].t.slice(st,p+q.length+90);
+    var st=Math.max(0,p-45),en=p+q.length+90;
+    var tx=idx[k].t.slice(st,en);
+    var tail=en<idx[k].t.length?'…':'';
     out.push('<button class="res" data-i="'+idx[k].i+'"><div class="rh">'+esc(idx[k].s.slice(0,52))+'</div><div class="rt">'+
-      (st>0?'…':'')+esc(tx.slice(0,p-st))+'<b>'+esc(tx.substr(p-st,q.length))+'</b>'+esc(tx.slice(p-st+q.length))+'…</div></button>');
+      (st>0?'…':'')+esc(tx.slice(0,p-st))+'<b>'+esc(tx.substr(p-st,q.length))+'</b>'+esc(tx.slice(p-st+q.length))+tail+'</div></button>');
   }
   body.innerHTML=out.length?out.join(''):'<div class="empty">No matches.</div>';
 });
@@ -1227,9 +1232,11 @@ $('#qBody').addEventListener('click',function(e){
 
 /* ---------- glossary ---------- */
 var glossary=[];
+var glossarySecIds={};  // set of section IDs that belong to the inline glossary
 (function(){
   var gl=$$('#content h2').filter(function(h){return /^Part\s+[12]\s+—/i.test(h.textContent)});
   gl.forEach(function(h){
+    glossarySecIds[h.id]=1;
     var el=h.nextElementSibling;
     while(el&&el.tagName!=='H2'&&el.tagName!=='H1'){
       if(el.tagName==='UL'){
@@ -1300,7 +1307,6 @@ function annotateGlossary(){
     return a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   }).join('|')+')\\b','gi');
 
-  var gloss=document.getElementById('glossary');
   var walker=document.createTreeWalker(content,NodeFilter.SHOW_TEXT,{
     acceptNode:function(n){
       if(!n.nodeValue||!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
@@ -1313,9 +1319,9 @@ function annotateGlossary(){
 
   var seen={};
   nodes.forEach(function(node){
-    /* the glossary must not annotate itself */
-    if(gloss && (gloss.compareDocumentPosition(node)&Node.DOCUMENT_POSITION_FOLLOWING)) return;
+    /* skip the inline glossary section — it already defines the terms */
     var holder=node.parentNode.closest('[data-sec]');
+    if(holder && glossarySecIds[holder.dataset.sec]) return;
     var scope=GT_SCOPE==='document'?'*':((holder&&holder.dataset.sec)||'*');
     var text=node.nodeValue,frag=null,last=0,m;
     re.lastIndex=0;
@@ -1441,7 +1447,8 @@ seltb.addEventListener('click',function(e){
   if(!sel){ hideTb(); return; }
   if(b.dataset.lk==='copy'){
     if(navigator.clipboard) navigator.clipboard.writeText(sel);
-    b.textContent='Copied'; setTimeout(function(){b.textContent='Copy'},1200);
+    b.textContent='Copied';
+    setTimeout(function(){ hideTb(); pending=null; window.getSelection().removeAllRanges(); },1200);
     return;
   }
   /* Opened synchronously inside the click handler on purpose: deferring this
@@ -1451,18 +1458,17 @@ seltb.addEventListener('click',function(e){
 });
 
 /* ---------- resume ---------- */
-$('#resumeGo').addEventListener('click',function(){
-  $('#resume').classList.remove('on');
-  jumpBlock(prog.last,true);
-});
-setTimeout(function(){ $('#resume').classList.remove('on') },14000);
+function hideResume(){ $('#resume').classList.remove('on'); }
+$('#resumeGo').addEventListener('click',function(){ hideResume(); jumpBlock(prog.last,true); });
+$('#resumeX').addEventListener('click',hideResume);
+setTimeout(hideResume,14000);
 
 /* ---------- boot ---------- */
 (function(){
   var p=store.get(K.prefs); if(p)prefs=Object.assign(prefs,p);
   var g=store.get(K.prog);  if(g)prog=Object.assign(prog,g);
   applyPrefs(); annotateGlossary(); syncModBtns(); renderToc(''); renderGloss('');
-  if(prog.last&&prog.last>3){
+  if(prog.last&&prog.last>15){
     $('#resumeTx').textContent=prog.lastTx||('Block '+prog.last);
     $('#resume').classList.add('on');
   }

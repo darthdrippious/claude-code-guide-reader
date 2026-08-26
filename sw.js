@@ -1,10 +1,13 @@
-const CACHE_NAME = 'claude-guide-v1';
+const CACHE_NAME = 'claude-guide-v2';
 const APP_SHELL = [
   './',
   './index.html',
   './Claude%20Code%20Guide%20-%20Interactive%20Reader.html',
   './manifest.webmanifest',
-  './icon.svg'
+  './icon.svg',
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png'
 ];
 
 self.addEventListener('install', event => {

@@ -1,0 +1,18 @@
+{
+  "name": "Claude Code for Non-Coders",
+  "short_name": "Claude Guide",
+  "description": "Interactive reader for the Claude Code for Non-Coders guide.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F7F4ED",
+  "theme_color": "#F7F4ED",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

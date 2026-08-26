@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Claude Guide">
+  <rect width="512" height="512" rx="112" fill="#F7F4ED"/>
+  <rect x="90" y="78" width="332" height="356" rx="44" fill="#FFFDF7" stroke="#B5761F" stroke-width="18"/>
+  <path d="M150 170h212M150 226h212M150 282h150" stroke="#5C574C" stroke-width="20" stroke-linecap="round"/>
+  <circle cx="344" cy="348" r="50" fill="#B5761F"/>
+  <path d="M325 348l14 14 28-33" fill="none" stroke="#FFFDF7" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

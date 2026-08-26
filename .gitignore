@@ -1,2 +1,16 @@
+.env
+.env.local
+*.pem
+*.key
+node_modules/
+__pycache__/
+*.pyc
+venv/
+.venv/
+*.db
+*.sqlite
+*.sqlite3
+.claude/settings.local.json
+CLAUDE.local.md
 node_modules/
 .DS_Store

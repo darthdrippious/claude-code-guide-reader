@@ -1,0 +1,19 @@
+{
+  "id": "guide",
+  "title": "Claude Code for Non-Coders",
+  "shortTitle": "Claude Guide",
+  "files": [
+    "content/00-introduction.md",
+    "content/01-part-1-foundations.md",
+    "content/02-part-2-getting-set-up.md",
+    "content/03-part-3-core-working-model.md",
+    "content/04-part-4-building-real-things.md",
+    "content/05-part-5-scaling-and-reference.md",
+    "content/06-appendices.md",
+    "content/07-glossary.md"
+  ],
+  "glossary": {
+    "heading": "^Part\\s+[12]\\s+—"
+  },
+  "lookupAudience": "someone learning to build software with AI coding tools"
+}

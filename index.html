@@ -1,69 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#F7F4ED">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Claude Guide">
-  <title>Claude Code for Non-Coders</title>
-  <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./icon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-  <style>
-    :root { color-scheme: light; }
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      display: grid;
-      place-items: center;
-      background: #F7F4ED;
-      color: #22201B;
-      font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-    main { text-align: center; padding: 28px; }
-    .mark {
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 18px;
-      border: 2px solid #B5761F;
-      border-radius: 16px;
-      display: grid;
-      place-items: center;
-      color: #B5761F;
-      font-size: 26px;
-      font-weight: 700;
-    }
-    h1 { margin: 0 0 8px; font-size: 18px; }
-    p { margin: 0; color: #5C574C; font-size: 14px; }
-    a { color: #B5761F; }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F7F4ED">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>Guide Reader</title>
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
+<link rel="stylesheet" href="./reader.css">
 </head>
 <body>
-  <main>
-    <div class="mark" aria-hidden="true">CC</div>
-    <h1>Claude Code for Non-Coders</h1>
-    <p id="status">Opening the reader…</p>
-    <noscript><p><a href="./Claude%20Code%20Guide%20-%20Interactive%20Reader.html">Open the reader</a></p></noscript>
-  </main>
-  <script>
-    (function () {
-      var reader = './Claude%20Code%20Guide%20-%20Interactive%20Reader.html';
-      function openReader() { window.location.replace(reader); }
+<div id="bar">
+  <div id="barIn">
+    <button class="ico" id="bToc" aria-label="Contents"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <button class="ico" id="bSearch" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+    <div id="crumb"></div>
+    <button class="ico" id="bGloss" aria-label="Glossary"><svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 015.5 4H18a1 1 0 011 1v14a1 1 0 01-1 1H5.5A1.5 1.5 0 014 18.5z"/><path d="M8 8h7M8 12h7"/></svg></button>
+    <button class="ico" id="bAa" aria-label="Display"><svg viewBox="0 0 24 24"><path d="M4 19l5.5-14L15 19M6 14h7M17 19l3-8 3 8M18 16.5h4" /></svg></button>
+  </div>
+  <div id="pbar"><div id="pfill"></div></div>
+</div>
 
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js')
-          .then(function () { return navigator.serviceWorker.ready; })
-          .catch(function () {
-            document.getElementById('status').textContent = 'Opening without offline mode…';
-          })
-          .finally(openReader);
-      } else {
-        openReader();
-      }
-    })();
-  </script>
+
+<div id="wrap"><div id="content"><div id="loading">Loading…</div></div></div>
+
+<div id="seltb">
+  <button class="lab" data-lk="google">Google</button>
+  <button class="lab" data-lk="claude">Claude</button>
+  <button class="lab" data-lk="plx">Perplexity</button>
+  <button class="lab" data-lk="copy">Copy</button>
+</div>
+
+<div id="gtip" role="tooltip"></div>
+
+<div id="resume"><div class="rl"><b>Pick up where you left off</b><span id="resumeTx"></span></div><button id="resumeGo">Resume</button><button id="resumeX" aria-label="Dismiss">✕</button></div>
+
+<div class="scrim" id="scrim"></div>
+
+<nav class="panel" id="toc">
+  <div class="phead"><h3>Contents</h3><span id="modCount" class="ui" style="font-size:11.5px;color:var(--ink3)"></span><button class="xbtn" data-close>Done</button></div>
+  <div class="tocsearch"><input id="tocFilter" placeholder="Filter sections…" autocomplete="off"></div>
+  <div class="pbody" id="tocBody"></div>
+</nav>
+
+<div class="panel sheet" id="pSet">
+  <div class="grab"></div>
+  <div class="phead"><h3>Display</h3><button class="xbtn" data-close>Done</button></div>
+  <div class="pbody">
+    <div class="row"><span class="lbl">Text size</span><div class="seg" id="segFs">
+      <button data-fs="15">A</button><button data-fs="17">A</button><button data-fs="19">A</button><button data-fs="21">A</button><button data-fs="24">A</button></div></div>
+    <div class="row"><span class="lbl">Line spacing</span><div class="seg" id="segLh">
+      <button data-lh="1.5">Tight</button><button data-lh="1.72">Normal</button><button data-lh="1.95">Airy</button></div></div>
+    <div class="row"><span class="lbl">Theme</span><div class="seg" id="segTh">
+      <button data-th="paper">Paper</button><button data-th="sepia">Sepia</button><button data-th="night">Night</button></div></div>
+    <div class="row"><span class="lbl">Width</span><div class="seg" id="segW">
+      <button data-w="31rem">Narrow</button><button data-w="35rem">Normal</button><button data-w="44rem">Wide</button></div></div>
+  </div>
+</div>
+
+<div class="panel sheet" id="pSearch">
+  <div class="grab"></div>
+  <div class="phead"><h3>Search</h3><button class="xbtn" data-close>Done</button></div>
+  <div class="tocsearch"><input id="qInput" placeholder="Search the guide…" autocomplete="off"></div>
+  <div class="pbody" id="qBody"><div class="empty">Type to search the whole guide.</div></div>
+</div>
+
+<div class="panel sheet" id="pGloss">
+  <div class="grab"></div>
+  <div class="phead"><h3>Glossary</h3><button class="xbtn" data-close>Done</button></div>
+  <div class="tocsearch"><input id="gInput" placeholder="Look up a term…" autocomplete="off"></div>
+  <div class="pbody" id="gBody"></div>
+</div>
+
+
+<div id="lightbox" role="dialog" aria-label="Image"><img alt=""></div>
+
+<script src="./vendor/marked.umd.js"></script>
+<script src="./reader.js"></script>
 </body>
 </html>

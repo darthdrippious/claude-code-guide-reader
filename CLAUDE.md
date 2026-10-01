@@ -4,7 +4,7 @@ This is an interactive HTML reader for a personal self-study guide ("Claude Code
 
 ## Hard constraints (don't drift from these across sessions)
 
-- **Single, standalone HTML file.** No build step, no server, no framework install to run it. A couple of adjacent files is fine if genuinely cleaner, but the whole point is "double-click it and it works."
+- **Static site, no build step.** The engine (`index.html`, `reader.css`, `reader.js`, `sw.js`, `vendor/marked.umd.js`) is separate from the content (`guide.json` + Markdown files in `content/`, images alongside). Nothing to install or compile; it just needs to be *served* (GitHub Pages, or `python3 -m http.server` locally) because it `fetch()`es the Markdown. Opening `index.html` straight from disk shows an explanatory error. Don't add a bundler or framework.
 - **No backend, no API keys embedded anywhere in the file.** Its JavaScript is fully visible to anyone who opens it — never add a live call to an AI API from inside the page. If AI lookup is wanted, it's an external link to the tool's own web app, not an in-page integration.
 - **No `window.storage`.** That's a Claude.ai-artifact-only API and doesn't exist here. Use `localStorage`, and treat everything stored in it as best-effort, not guaranteed — see below.
 - **Target platforms: Chrome on iPhone, Chrome on laptop.** These are the only two real contexts this needs to work well on. Note that iOS requires all browsers, Chrome included, to run on Apple's WebKit engine — don't assume Chrome-on-iOS behaves like Chrome-on-desktop.
@@ -13,7 +13,7 @@ This is an interactive HTML reader for a personal self-study guide ("Claude Code
 
 ## Source content
 
-The guide itself lives in `Claude Code for Non-Coders - Guide & Course.md` in this folder — convert from that, don't rewrite the content by hand.
+The guide lives in `content/*.md`, listed in order in `guide.json`. Edit those files; don't hand-write HTML. To reuse the reader for a different guide, follow `README.md`. The engine is guide-agnostic: guide-specific settings (title, storage id, module/glossary heading patterns) belong in `guide.json`, not in `reader.js`.
 
 ## Where to look for the original ask
 
